@@ -22,10 +22,18 @@ public:
 //    void snakeHitWall(Snake *snake, Wall *wall);
     void snakeAteItself();
 
+    bool isPause;
+
 public slots:
     void pause();
     void resume();
     void gameOver();
+    void setMoveDirection(int dire);
+
+signals:
+    void paused();
+    void resumed();
+    void directionChanged(int dire);
 
 protected:
      bool eventFilter(QObject *object, QEvent *event);
@@ -38,7 +46,6 @@ private:
     QGraphicsScene &scene;
 
     Snake *snake;
-    bool isPause;
 };
 
 #endif // GAMECONTROLLER_H

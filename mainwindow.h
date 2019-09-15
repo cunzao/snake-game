@@ -28,6 +28,9 @@ private:
     void initScene();
     void initSceneBackground();
 
+    void resueActionAbility();
+    void pauseActionAbility();
+
 
     QGraphicsScene *scene;
     QGraphicsView *view;
@@ -40,7 +43,7 @@ private:
 	QAction *exitAction;
 	QAction *gameHelpAction;
 	QAction *aboutAction;
-	QAction *aboutQtAction;
+    QAction *aboutQtAction;
 };
 
 #endif // MAINWINDOW_H

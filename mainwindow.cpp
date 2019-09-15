@@ -4,6 +4,9 @@
 #include <qmenubar.h>
 #include <qapplication.h>
 #include <qmessagebox.h>
+#include <QVBoxLayout>
+
+#include <QDebug>
 
 #include "constants.h"
 #include "gamecontroller.h"
@@ -17,15 +20,17 @@ MainWindow::MainWindow(QWidget *parent)
       game(new GameController(*scene, this))
 {
     setCentralWidget(view);
-//    resize(600, 600);
-    setFixedSize(600, 600);
     setWindowIcon(QIcon(":/images/snake_ico"));
 
 	createActions();
-	createMenus();
+    createMenus();
 
     initScene();
     initSceneBackground();
+
+
+    connect(game, &GameController::paused, this, &MainWindow::pauseActionAbility);
+    connect(game, &GameController::resumed, this, &MainWindow::resueActionAbility);
 
     QTimer::singleShot(0, this, SLOT(adjustViewSize()));
 }
@@ -52,13 +57,13 @@ void MainWindow::createActions()
 	exitAction->setStatusTip(tr("Exit the game"));
 	connect(exitAction, &QAction::triggered, this, &MainWindow::close);
 
-	pauseAction = new QAction(tr("&Pause"), this);
+    pauseAction = new QAction(tr("&Pause"), this);
 	pauseAction->setStatusTip(tr("Pause..."));
-	connect(pauseAction, &QAction::triggered, game, &GameController::pause);
+    connect(pauseAction, &QAction::triggered, game, &GameController::pause);
 
 	resumeAction = new QAction(tr("&Resume"), this);
 	resumeAction->setStatusTip(tr("Resume..."));
-	connect(resumeAction, &QAction::triggered, game, &GameController::resume);
+    connect(resumeAction, &QAction::triggered, game, &GameController::resume);
 
 	gameHelpAction = new QAction(tr("Game &Help"), this);
 	gameHelpAction->setShortcut(tr("Ctrl+H"));
@@ -92,15 +97,15 @@ void MainWindow::createMenus()
 
 void MainWindow::initScene()
 {
-    scene->setSceneRect(-100, -100, 200, 200);
+    scene->setSceneRect(-(TILE_SIZE*30), -(TILE_SIZE*30), TILE_SIZE*60, TILE_SIZE*60);
 }
 
 void MainWindow::initSceneBackground()
 {
-    QPixmap bg(TILE_SIZE, TILE_SIZE);
+    QPixmap bg(TILE_SIZE*5, TILE_SIZE*5);
     QPainter p(&bg);
     p.setBrush(QBrush(Qt::gray));
-    p.drawRect(0, 0, TILE_SIZE, TILE_SIZE);
+    p.drawRect(0, 0, TILE_SIZE*5, TILE_SIZE*5);
 
     view->setBackgroundBrush(QBrush(bg));
 }
@@ -121,4 +126,17 @@ void MainWindow::gameHelp()
 {
 	QMessageBox::about(this, tr("Game Help"), tr("Using direction keys to control the snake to eat the food"
 		"<p>Space - pause & resume"));
+}
+
+
+void MainWindow::resueActionAbility(){
+    qDebug()<<"开始";
+    resumeAction->setDisabled(true);
+    pauseAction->setDisabled(false);
+}
+
+void MainWindow::pauseActionAbility(){
+    qDebug()<<"暂停";
+    resumeAction->setDisabled(false);
+    pauseAction->setDisabled(true);
 }

@@ -3,16 +3,19 @@
 #include "constants.h"
 #include "gamecontroller.h"
 #include "snake.h"
+#include <QDebug>
 
-static const qreal SNAKE_SIZE = TILE_SIZE;
+static const qreal SNAKE_SIZE = TILE_SIZE*5;
 
-Snake::Snake(GameController &controller) :
+Snake::Snake(GameController &acontroller) :
     head(0, 0),
     growing(7),
     speed(5),
     moveDirection(NoMove),
-    controller(controller)
+    controller(acontroller),
+    directionChangedOneRound(false)
 {
+
 }
 
 QRectF Snake::boundingRect() const
@@ -51,19 +54,23 @@ QPainterPath Snake::shape() const
         QPointF itemp = mapFromScene(p);
         path.addRect(QRectF(itemp.x(), itemp.y(), SNAKE_SIZE, SNAKE_SIZE));
     }
-
+//    qDebug()<<tail;
     return path;
 }
 
 void Snake::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
     painter->save();
-    painter->fillPath(shape(), Qt::yellow);
+    painter->fillPath(shape(), Qt::darkGreen);
     painter->restore();
 }
 
 void Snake::setMoveDirection(Direction direction)
 {
+    if(directionChangedOneRound){
+        qDebug()<<"按多了";
+        return;
+    }
     if (moveDirection == MoveLeft && direction == MoveRight)
         return;
     if (moveDirection == MoveRight && direction == MoveLeft)
@@ -73,6 +80,7 @@ void Snake::setMoveDirection(Direction direction)
     if (moveDirection == MoveDown && direction == MoveUp)
         return;
     moveDirection = direction;
+    directionChangedOneRound = true;
 }
 
 Snake::Direction Snake::currentDirection()
@@ -114,41 +122,44 @@ void Snake::advance(int step)
         case MoveDown:
             moveDown();
             break;
+        default:
+            return;
     }
-
+//    qDebug()<<speed;
     setPos(head);
     handleCollisions();
+    directionChangedOneRound = false;
 }
 
 void Snake::moveLeft()
 {
     head.rx() -= SNAKE_SIZE;
-    if (head.rx() < -100) {
-        head.rx() = 90;
+    if (head.rx() < -TILE_SIZE*30) {
+        head.rx() = TILE_SIZE*25;
     }
 }
 
 void Snake::moveRight()
 {
     head.rx() += SNAKE_SIZE;
-    if (head.rx() >= 100) {
-        head.rx() = -100;
+    if (head.rx() >= TILE_SIZE*30) {
+        head.rx() = -TILE_SIZE*30;
     }
 }
 
 void Snake::moveUp()
 {
     head.ry() -= SNAKE_SIZE;
-    if (head.ry() < -100) {
-        head.ry() = 90;
+    if (head.ry() < -TILE_SIZE*30) {
+        head.ry() = TILE_SIZE*25;
     }
 }
 
 void Snake::moveDown()
 {
     head.ry() += SNAKE_SIZE;
-    if (head.ry() >= 100) {
-        head.ry() = -100;
+    if (head.ry() >= TILE_SIZE*30) {
+        head.ry() = -TILE_SIZE*30;
     }
 }
 
