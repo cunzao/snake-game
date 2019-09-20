@@ -6,8 +6,9 @@
 
 class GameController;
 
-class Snake : public QGraphicsItem
+class Snake : public QObject, public QGraphicsItem
 {
+    Q_OBJECT
 public:
     enum Direction {
         NoMove,
@@ -17,21 +18,23 @@ public:
         MoveDown
     };
 
-    Snake(GameController &acontroller);
+//    Snake(GameController &acontroller);
+    Snake(GameController &acontroller, QObject *parent = nullptr);
+    ~Snake();
 
     QRectF boundingRect() const;
     QPainterPath shape() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *);
 
     void setMoveDirection(Direction direction);
-//    void setMoveDirection(int);
-	Direction currentDirection();
+    Direction currentDirection();
 
 protected:
     void advance(int step);
 
-//public slots:
-//    void setMoveDirection(int dire);
+public slots:
+    void setMoveDire(int dire);
+    void snakeDie();
 
 private:
     void moveLeft();
@@ -48,7 +51,6 @@ private:
     int            tickCounter;
     Direction      moveDirection;
     GameController &controller;
-    bool directionChangedOneRound;
 };
 
 #endif // SNAKE_H

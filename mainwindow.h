@@ -30,6 +30,7 @@ private:
 
     void resueActionAbility();
     void pauseActionAbility();
+    void gameOverAbility();
 
 
     QGraphicsScene *scene;

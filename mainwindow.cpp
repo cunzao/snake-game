@@ -31,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(game, &GameController::paused, this, &MainWindow::pauseActionAbility);
     connect(game, &GameController::resumed, this, &MainWindow::resueActionAbility);
+    connect(game, &GameController::gameOvered, this, &MainWindow::gameOverAbility);
 
     QTimer::singleShot(0, this, SLOT(adjustViewSize()));
 }
@@ -138,5 +139,12 @@ void MainWindow::resueActionAbility(){
 void MainWindow::pauseActionAbility(){
     qDebug()<<"暂停";
     resumeAction->setDisabled(false);
+    pauseAction->setDisabled(true);
+}
+
+void MainWindow::gameOverAbility(){
+    disconnect(game, &GameController::paused, this, &MainWindow::pauseActionAbility);
+    disconnect(game, &GameController::resumed, this, &MainWindow::resueActionAbility);
+    resumeAction->setDisabled(true);
     pauseAction->setDisabled(true);
 }

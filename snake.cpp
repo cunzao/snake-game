@@ -7,14 +7,18 @@
 
 static const qreal SNAKE_SIZE = TILE_SIZE*5;
 
-Snake::Snake(GameController &acontroller) :
+Snake::Snake(GameController &acontroller, QObject *parent) :
+    QObject(parent),
     head(0, 0),
     growing(7),
     speed(5),
     moveDirection(NoMove),
-    controller(acontroller),
-    directionChangedOneRound(false)
+    controller(acontroller)
 {
+    connect(&controller, &GameController::directionChanged, this, &Snake::setMoveDire);
+}
+
+Snake::~Snake(){
 
 }
 
@@ -67,10 +71,6 @@ void Snake::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *
 
 void Snake::setMoveDirection(Direction direction)
 {
-    if(directionChangedOneRound){
-        qDebug()<<"按多了";
-        return;
-    }
     if (moveDirection == MoveLeft && direction == MoveRight)
         return;
     if (moveDirection == MoveRight && direction == MoveLeft)
@@ -80,7 +80,6 @@ void Snake::setMoveDirection(Direction direction)
     if (moveDirection == MoveDown && direction == MoveUp)
         return;
     moveDirection = direction;
-    directionChangedOneRound = true;
 }
 
 Snake::Direction Snake::currentDirection()
@@ -128,7 +127,7 @@ void Snake::advance(int step)
 //    qDebug()<<speed;
     setPos(head);
     handleCollisions();
-    directionChangedOneRound = false;
+    connect(&controller, &GameController::directionChanged, this, &Snake::setMoveDire);
 }
 
 void Snake::moveLeft()
@@ -180,4 +179,28 @@ void Snake::handleCollisions()
     if (tail.contains(head)) {
         controller.snakeAteItself();
     }
+}
+
+void Snake::setMoveDire(int dire){
+    switch (dire) {
+    case 1:
+        this->setMoveDirection(Snake::MoveLeft);
+        break;
+    case 2:
+        this->setMoveDirection(Snake::MoveRight);
+        break;
+    case 3:
+        this->setMoveDirection(Snake::MoveUp);
+        break;
+    case 4:
+        this->setMoveDirection(Snake::MoveDown);
+        break;
+    default:
+        return;
+    }
+    disconnect(&controller, &GameController::directionChanged, this, &Snake::setMoveDire);
+}
+
+void Snake::snakeDie(){
+    disconnect(&controller, &GameController::directionChanged, this, &Snake::setMoveDire);
 }

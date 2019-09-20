@@ -13,6 +13,7 @@ GameController::GameController(QGraphicsScene &scene, QObject *parent) :
     QObject(parent),
     isPause(false),
     scene(scene),
+    score(0),
     snake(new Snake(*this))
 {
     timer.start( 1000/33 );
@@ -22,9 +23,12 @@ GameController::GameController(QGraphicsScene &scene, QObject *parent) :
     scene.addItem(snake);
     scene.installEventFilter(this);
 
-    QObject::connect(this, &GameController::directionChanged, this, &GameController::setMoveDirection);
+//    QObject::connect(this, &GameController::directionChanged, snake, &Snake::setMoveDirection);
 
-    resume();
+//    resume();
+    connect(this, &GameController::paused, this, &GameController::pause);
+    connect(this, &GameController::resumed, this, &GameController::resume);
+    emit resumed();
 }
 
 GameController::~GameController()
@@ -34,7 +38,7 @@ GameController::~GameController()
 void GameController::snakeAteFood(Food *food)
 {
     scene.removeItem(food);
-
+    score += 1;
     addNewFood();
 }
 
@@ -68,33 +72,35 @@ void GameController::handleKeyPressed(QKeyEvent *event)
                 emit directionChanged(4);
                 break;
             case Qt::Key_Space:
-                pause();
+//                pause();
+                emit paused();
                 break;
         }
     else{
-        resume();
+//        resume();
+        emit resumed();
     }
 }
 
-void GameController::setMoveDirection(int dire){
+//void GameController::setMoveDirection(int dire){
 
-    switch (dire) {
-    case 1:
-        snake->setMoveDirection(Snake::MoveLeft);
-        break;
-    case 2:
-        snake->setMoveDirection(Snake::MoveRight);
-        break;
-    case 3:
-        snake->setMoveDirection(Snake::MoveUp);
-        break;
-    case 4:
-        snake->setMoveDirection(Snake::MoveDown);
-        break;
-    default:
-        return;
-    }
-}
+//    switch (dire) {
+//    case 1:
+//        snake->setMoveDirection(Snake::MoveLeft);
+//        break;
+//    case 2:
+//        snake->setMoveDirection(Snake::MoveRight);
+//        break;
+//    case 3:
+//        snake->setMoveDirection(Snake::MoveUp);
+//        break;
+//    case 4:
+//        snake->setMoveDirection(Snake::MoveDown);
+//        break;
+//    default:
+//        return;
+//    }
+//}
 
 void GameController::addNewFood()
 {
@@ -125,6 +131,10 @@ void GameController::gameOver()
         scene.addItem(snake);
         addNewFood();
     } else {
+        QMessageBox::information(nullptr,"成绩","恭喜你你的成绩是\n"+QString::number(score),QMessageBox::Ok);
+        disconnect(this, &GameController::paused, this, &GameController::pause);
+        disconnect(this, &GameController::resumed, this, &GameController::resume);
+        emit gameOvered();
 //        exit(0);
     }
 }
@@ -135,7 +145,7 @@ void GameController::pause()
                &scene, SLOT(advance()));
     isPause = true;
 //    qDebug()<<"GameController::pause"<<isPause;
-    emit paused();
+//    emit paused();
 }
 
 void GameController::resume()
@@ -146,8 +156,7 @@ void GameController::resume()
             &scene, SLOT(advance()));
     isPause = false;
 //    qDebug()<<"GameController::resume"<<isPause;
-    emit resumed();
-
+//    emit resumed();
 }
 
 bool GameController::eventFilter(QObject *object, QEvent *event)

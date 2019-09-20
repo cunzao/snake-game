@@ -15,7 +15,7 @@ class GameController : public QObject
 {
     Q_OBJECT
 public:
-    GameController(QGraphicsScene &scene, QObject *parent = 0);
+    GameController(QGraphicsScene &scene, QObject *parent = nullptr);
     ~GameController();
 
     void snakeAteFood(Food *food);
@@ -28,12 +28,13 @@ public slots:
     void pause();
     void resume();
     void gameOver();
-    void setMoveDirection(int dire);
+//    void setMoveDirection(int dire);
 
 signals:
     void paused();
     void resumed();
     void directionChanged(int dire);
+    void gameOvered();
 
 protected:
      bool eventFilter(QObject *object, QEvent *event);
@@ -45,6 +46,7 @@ private:
     QTimer timer;
     QGraphicsScene &scene;
 
+    int score;
     Snake *snake;
 };
 
